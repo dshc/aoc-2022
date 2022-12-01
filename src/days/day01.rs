@@ -2,7 +2,7 @@
 
 use std::{
     fs::File,
-    io::{self, BufRead},
+    io::{self, BufRead}, collections::BinaryHeap,
 };
 
 const INPUT_PATH_REAL: &str = "./inputs/011real.txt";
@@ -23,39 +23,42 @@ pub fn solve() {
 }
 
 fn part1() -> Option<u32> {
-    let mut max: u32 = 0;
-
-    get_line_iter(INPUT_PATH_REAL).fold(0, |acc, x| match x.unwrap().trim() {
-        "" => {
-            if acc > max {
-                max = acc
-            };
-            0
-        }
-        cals => acc + cals.parse::<u32>().unwrap(),
-    });
-
-    Some(max)
+    Some(get_sorted_calories(INPUT_PATH_REAL).pop().unwrap())
 }
 
 fn part2() -> Option<u32> {
-    let mut cals_by_elf = Vec::new();
+    let mut sorted = get_sorted_calories(INPUT_PATH_REAL);
+    let mut result = 0;
+    for _ in 0..3 {
+        result += sorted.pop().unwrap();
+    }
+    Some(result)
+}
 
-    get_line_iter(INPUT_PATH_REAL).fold(0, |acc, x| match x.unwrap().trim() {
-        "" => {
+fn get_sorted_calories(path: &str) -> BinaryHeap<u32> {
+    let mut cals_by_elf = BinaryHeap::new();
+    get_lines(path).iter().fold(0, |acc, x| match x {
+        None => {
             cals_by_elf.push(acc);
             0
         }
-        cals => acc + cals.parse::<u32>().unwrap(),
+        Some(cals) => acc + cals,
     });
-
-    cals_by_elf.sort();
-
-    Some(cals_by_elf.iter().rev().take(3).sum())
+    cals_by_elf
 }
 
-fn get_line_iter(path: &str) -> io::Lines<io::BufReader<File>> {
+fn get_lines(path: &str) -> Vec<Option<u32>> {
     let file = File::open(path).unwrap();
     let reader = io::BufReader::new(file);
-    return reader.lines();
+    reader
+        .lines()
+        .map(|x| {
+            let temp_str = x.unwrap();
+            let i = temp_str.parse::<u32>();
+            match i {
+                Ok(t) => Some(t),
+                Err(_) => None,
+            }
+        })
+        .collect::<Vec<Option<u32>>>()
 }
