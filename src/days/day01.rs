@@ -24,49 +24,34 @@ pub fn solve() {
 
 fn part1() -> Option<u32> {
     let mut max: u32 = 0;
-    let mut curr_elf: u32 = 0;
 
-    get_line_iter(INPUT_PATH_REAL).for_each(|x| match x.unwrap().trim() {
+    get_line_iter(INPUT_PATH_REAL).fold(0, |acc, x| match x.unwrap().trim() {
         "" => {
-            if curr_elf > max {
-                max = curr_elf
-            }
-            curr_elf = 0;
+            if acc > max {
+                max = acc
+            };
+            0
         }
-        cals => curr_elf += cals.parse::<u32>().unwrap(),
+        cals => acc + cals.parse::<u32>().unwrap(),
     });
-
-    if curr_elf != 0 && curr_elf > max {
-        max = curr_elf;
-    }
 
     return Some(max);
 }
 
 fn part2() -> Option<u32> {
     let mut cals_by_elf = Vec::new();
-    let mut curr_elf = 0;
 
-    get_line_iter(INPUT_PATH_REAL).for_each(|x| match x.unwrap().trim() {
+    get_line_iter(INPUT_PATH_REAL).fold(0, |acc, x| match x.unwrap().trim() {
         "" => {
-            cals_by_elf.push(curr_elf);
-            curr_elf = 0;
+            cals_by_elf.push(acc);
+            0
         }
-        cals => curr_elf += cals.parse::<u32>().unwrap(),
+        cals => acc + cals.parse::<u32>().unwrap(),
     });
-
-    if curr_elf != 0 {
-        cals_by_elf.push(curr_elf);
-    }
 
     cals_by_elf.sort();
 
-    let mut sum = 0;
-    for _ in 0..3 {
-        sum += cals_by_elf.pop().unwrap();
-    }
-
-    return Some(sum);
+    Some(cals_by_elf.iter().rev().take(3).sum())
 }
 
 fn get_line_iter(path: &str) -> io::Lines<io::BufReader<File>> {
