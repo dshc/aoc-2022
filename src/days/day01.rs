@@ -35,7 +35,7 @@ fn part1() -> Option<u32> {
         cals => acc + cals.parse::<u32>().unwrap(),
     });
 
-    return Some(max);
+    Some(max)
 }
 
 fn part2() -> Option<u32> {
