@@ -20,34 +20,22 @@ pub fn solve() {
     println!("part2: {}", score_part2);
 }
 
+fn exec(opponent: &str, a: u32, b: u32, c: u32) -> u32 {
+    match opponent {
+        "A" => return a,
+        "B" => return b,
+        "C" => return c,
+        _ => unimplemented!(),
+    }
+}
+
 fn calc_score_part2(opponent: &str, player: &str) -> u32 {
     let mut score = 0;
 
     match player {
-        "X" => {
-            match opponent {
-                "A" => score += 3,
-                "B" => score += 1,
-                "C" => score += 2,
-                _ => unimplemented!(),
-            }
-        }
-        "Y" => {
-            match opponent {
-                "A" => score += 4,
-                "B" => score += 5,
-                "C" => score += 6,
-                _ => unimplemented!(),
-            }
-        }
-        "Z" => {
-            match opponent {
-                "A" => score += 8,
-                "B" => score += 9,
-                "C" => score += 7,
-                _ => unimplemented!(),
-            }
-        }
+        "X" => score += exec(opponent, 3, 1, 2),
+        "Y" => score += exec(opponent, 4, 5, 6),
+        "Z" => score += exec(opponent, 8, 9, 7),
         _ => unimplemented!(),
     }
 
@@ -58,33 +46,9 @@ fn calc_score_part1(opponent: &str, player: &str) -> u32 {
     let mut score = 0;
 
     match player {
-        "X" => {
-            score += 1;
-            match opponent {
-                "A" => score += 3,
-                "B" => score += 0,
-                "C" => score += 6,
-                _ => unimplemented!(),
-            }
-        }
-        "Y" => {
-            score += 2;
-            match opponent {
-                "A" => score += 6,
-                "B" => score += 3,
-                "C" => score += 0,
-                _ => unimplemented!(),
-            }
-        }
-        "Z" => {
-            score += 3;
-            match opponent {
-                "A" => score += 0,
-                "B" => score += 6,
-                "C" => score += 3,
-                _ => unimplemented!(),
-            }
-        }
+        "X" => score += exec(opponent, 4, 1, 7),
+        "Y" => score += exec(opponent, 8, 5, 2),
+        "Z" => score += exec(opponent, 3, 9, 6),
         _ => unimplemented!(),
     }
 
