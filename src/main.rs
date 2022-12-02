@@ -2,7 +2,7 @@ mod days;
 
 use std::env;
 
-use crate::days::day01;
+use crate::days::{day01, day02};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -15,6 +15,7 @@ fn main() {
 
     match day_choice {
         1 => day01::solve(),
+        2 => day02::solve(),
         _ => unimplemented!(),
     }
 }

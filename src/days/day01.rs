@@ -1,12 +1,10 @@
-#![allow(dead_code)]
-
 use std::{
     fs::File,
     io::{self, BufRead}, collections::BinaryHeap,
 };
 
-const INPUT_PATH_REAL: &str = "./inputs/011real.txt";
-const INPUT_PATH_TEST: &str = "./inputs/011test.txt";
+const _INPUT_PATH_REAL: &str = "./inputs/011real.txt";
+const _INPUT_PATH_TEST: &str = "./inputs/011test.txt";
 
 pub fn solve() {
     let part1 = part1();
@@ -23,11 +21,11 @@ pub fn solve() {
 }
 
 fn part1() -> Option<u32> {
-    Some(get_sorted_calories(INPUT_PATH_REAL).pop().unwrap())
+    Some(get_sorted_calories(_INPUT_PATH_REAL).pop().unwrap())
 }
 
 fn part2() -> Option<u32> {
-    let mut sorted = get_sorted_calories(INPUT_PATH_REAL);
+    let mut sorted = get_sorted_calories(_INPUT_PATH_REAL);
     let mut result = 0;
     for _ in 0..3 {
         result += sorted.pop().unwrap();
