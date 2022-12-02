@@ -30,27 +30,19 @@ fn exec(opponent: &str, a: u32, b: u32, c: u32) -> u32 {
 }
 
 fn calc_score_part2(opponent: &str, player: &str) -> u32 {
-    let mut score = 0;
-
     match player {
-        "X" => score += exec(opponent, 3, 1, 2),
-        "Y" => score += exec(opponent, 4, 5, 6),
-        "Z" => score += exec(opponent, 8, 9, 7),
+        "X" => return exec(opponent, 3, 1, 2),
+        "Y" => return exec(opponent, 4, 5, 6),
+        "Z" => return exec(opponent, 8, 9, 7),
         _ => unimplemented!(),
     }
-
-    score
 }
 
 fn calc_score_part1(opponent: &str, player: &str) -> u32 {
-    let mut score = 0;
-
     match player {
-        "X" => score += exec(opponent, 4, 1, 7),
-        "Y" => score += exec(opponent, 8, 5, 2),
-        "Z" => score += exec(opponent, 3, 9, 6),
+        "X" => return exec(opponent, 4, 1, 7),
+        "Y" => return exec(opponent, 8, 5, 2),
+        "Z" => return exec(opponent, 3, 9, 6),
         _ => unimplemented!(),
     }
-
-    score
 }
