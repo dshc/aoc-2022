@@ -2,7 +2,7 @@ mod days;
 
 use std::{env, time::Instant};
 
-use crate::days::{day01, day02};
+use crate::days::{day01, day02, day03};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -17,6 +17,7 @@ fn main() {
     match day_choice {
         1 => day01::solve(),
         2 => day02::solve(),
+        3 => day03::solve(),
         _ => unimplemented!(),
     }
     println!("Timer (ms): {:#?}", now.elapsed());
