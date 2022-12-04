@@ -11,12 +11,7 @@ fn part1() -> usize {
         .map(|x| x.parse().unwrap())
         .collect::<Vec<usize>>()
         .chunks(4)
-        .filter(|x| {
-            let first = x[0]..=x[1];
-            let second = x[2]..=x[3];
-            (first.contains(&x[2]) && first.contains(&x[3]))
-                || (second.contains(&x[0]) && second.contains(&x[1]))
-        })
+        .filter(|x| (x[0] >= x[2] && x[1] <= x[3]) || (x[0] <= x[2] && x[1] >= x[3]))
         .count()
 }
 
@@ -28,11 +23,6 @@ fn part2() -> usize {
         .map(|x| x.parse().unwrap())
         .collect::<Vec<usize>>()
         .chunks(4)
-        .filter(|x| {
-            let first = x[0]..=x[1];
-            let second = x[2]..=x[3];
-            (first.contains(&x[2]) || first.contains(&x[3]))
-                || (second.contains(&x[0]) || second.contains(&x[1]))
-        })
+        .filter(|x| (x[0] <= x[3]) && (x[1] >= x[2]))
         .count()
 }
