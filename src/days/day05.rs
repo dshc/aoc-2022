@@ -9,6 +9,70 @@ pub fn solve() {
     let init = &x[0];
     let instructions = &x[1];
 
+    println!("part1: {}", part1(init, instructions));
+    println!("part2: {}", part2(init, instructions));
+}
+
+fn part2(init: &Vec<&str>, instructions: &Vec<&str>) -> String {
+    let mut stacks = initialize_stacks(init);
+
+    parse_instructions(instructions).iter().for_each(|x| {
+        let count = x[0];
+        let from = x[1];
+        let to = x[2];
+
+        let mut temp_vec = VecDeque::new();
+
+        for _ in 0..count {
+            let t = stacks[from - 1].pop_back().unwrap();
+            temp_vec.push_back(t);
+        }
+        for _ in 0..temp_vec.len() {
+            let t = temp_vec.pop_back().unwrap();
+            stacks[to - 1].push_back(t);
+        }
+    });
+
+    calc_result(&mut stacks)
+}
+
+fn part1(init: &Vec<&str>, instructions: &Vec<&str>) -> String {
+    let mut stacks = initialize_stacks(init);
+
+    parse_instructions(instructions).iter().for_each(|x| {
+        let count = x[0];
+        let from = x[1];
+        let to = x[2];
+
+        for _ in 0..count {
+            let t = stacks[from - 1].pop_back().unwrap();
+            stacks[to - 1].push_back(t);
+        }
+    });
+
+    calc_result(&mut stacks)
+}
+
+fn parse_instructions(inst: &Vec<&str>) -> Vec<Vec<usize>> {
+    inst.iter()
+        .map(|x| {
+            x.split(" ")
+                .filter_map(|temp| temp.parse::<usize>().ok())
+                .collect::<Vec<usize>>()
+        })
+        .filter(|x| x.len() > 0)
+        .collect()
+}
+
+fn calc_result(stacks: &mut Vec<VecDeque<char>>) -> String {
+    let mut result = String::new();
+    for i in 0..stacks.len() {
+        result += &stacks[i].pop_back().unwrap().to_string();
+    }
+    result
+}
+
+fn initialize_stacks(init: &Vec<&str>) -> Vec<VecDeque<char>> {
     let mut stacks: Vec<VecDeque<char>> = Vec::new();
 
     init.iter().for_each(|line| {
@@ -32,30 +96,5 @@ pub fn solve() {
             })
     });
 
-    instructions.iter().for_each(|instruction| {
-        let x = instruction
-            .split(" ")
-            .filter_map(|temp| temp.parse::<usize>().ok())
-            .collect::<Vec<usize>>();
-
-        if x.len() == 0 {
-            return;
-        }
-
-        let count = x[0];
-        let from = x[1];
-        let to = x[2];
-
-        for _ in 0..count {
-            let t = stacks[from - 1].pop_back().unwrap();
-            stacks[to - 1].push_back(t);
-        }
-    });
-
-    let mut result = String::new();
-    for i in 0..stacks.len() {
-        result += &stacks[i].pop_back().unwrap().to_string();
-    }
-
-    println!("{}", result);
+    stacks
 }
