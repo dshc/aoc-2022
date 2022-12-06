@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 pub fn solve() {
     let s = include_str!("../../inputs/061real.txt");
     println!("part1: {}", part1(s));
@@ -14,17 +16,13 @@ pub fn part2(s: &str) -> usize {
 
 pub fn find_start(s: &str, window_size: usize) -> usize {
     let chars = s.chars().collect::<Vec<char>>();
-    let mut result = 0;
-    for (i, window) in chars.windows(window_size).enumerate() {
-        let mut v = window.to_vec();
-        v.sort();
-        v.dedup();
-        if v.len() == window_size {
-            result = i + window_size;
-            break;
-        }
-    }
-    result
+    chars
+        .windows(window_size)
+        .enumerate()
+        .filter(|(_, window)| window.into_iter().all_unique())
+        .map(|(i, _)| i+window_size)
+        .next()
+        .unwrap()
 }
 
 #[cfg(test)]
