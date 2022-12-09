@@ -2,51 +2,16 @@ use std::collections::HashSet;
 
 pub fn solve() {
     let input = include_str!("../../inputs/091real.txt");
-    let part1_result = part1(input);
+    let part1_result = calc(input, 2);
     println!("part1: {}", part1_result);
-    let part2_result = part2(input);
+    let part2_result = calc(input, 10);
     println!("part2: {}", part2_result);
 }
 
-fn part1(input: &str) -> usize {
+fn calc(input: &str, num_knots: usize) -> usize {
     let mut tail_visited: HashSet<(i32, i32)> = HashSet::new();
 
-    let (mut head, mut tail) = ((0, 0), (0, 0));
-
-    input
-        .lines()
-        .map(|line| line.split_whitespace())
-        .map(|mut split| {
-            (
-                split.next().unwrap(),
-                split.next().unwrap().parse::<i32>().unwrap(),
-            )
-        })
-        .for_each(|(dir, count)| {
-            for _ in 0..count {
-                // move head
-                head = move_head_single(head, dir);
-
-                // check distance between head and tail
-                let distance = calculate_distance(head, tail);
-
-                // move tail if necessary
-                if distance >= 2.0 {
-                    tail = move_tail(head, tail);
-                }
-
-                // add tail coords to tail_visited
-                tail_visited.insert(tail);
-            }
-        });
-
-    tail_visited.len()
-}
-
-fn part2(input: &str) -> usize {
-    let mut tail_visited: HashSet<(i32, i32)> = HashSet::new();
-
-    let mut knots = vec![(0, 0); 10];
+    let mut knots = vec![(0, 0); num_knots];
 
     input
         .lines()
@@ -74,7 +39,7 @@ fn part2(input: &str) -> usize {
                 }
 
                 // add tail coords to tail_visited
-                tail_visited.insert(knots[9]);
+                tail_visited.insert(knots[num_knots-1]);
             }
         });
 
@@ -117,12 +82,12 @@ fn calculate_distance(head: (i32, i32), tail: (i32, i32)) -> f32 {
     ((((tail.0 - head.0).pow(2)) + ((tail.1 - head.1).pow(2))) as f32).sqrt()
 }
 
-fn move_head_single(origin: (i32, i32), dir: &str) -> (i32, i32) {
+fn move_head_single(head: (i32, i32), dir: &str) -> (i32, i32) {
     match dir {
-        "U" => (origin.0, origin.1 + 1),
-        "D" => (origin.0, origin.1 - 1),
-        "L" => (origin.0 - 1, origin.1),
-        "R" => (origin.0 + 1, origin.1),
+        "U" => (head.0, head.1 + 1),
+        "D" => (head.0, head.1 - 1),
+        "L" => (head.0 - 1, head.1),
+        "R" => (head.0 + 1, head.1),
         _ => unreachable!(),
     }
 }
@@ -134,7 +99,13 @@ mod tests {
     #[test]
     fn part1_example_test() {
         let input = "R 4\nU 4\nL 3\nD 1\nR 4\nD 1\nL 5\nR 2";
-        assert_eq!(part1(input), 13);
+        assert_eq!(calc(input, 2), 13);
+    }
+
+    #[test]
+    fn part2_example_test() {
+        let input = "R 5\nU 8\nL 8\nD 3\nR 17\nD 10\nL 25\nU 20";
+        assert_eq!(calc(input, 10), 36);
     }
 
     #[test]
