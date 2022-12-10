@@ -1,6 +1,7 @@
 pub fn solve() {
     let input_str = include_str!("../../inputs/101real.txt");
     println!("part1: {}", part1(input_str));
+    println!("part2: {}", part2(input_str));
 }
 
 fn part1(input_str: &str) -> i32 {
@@ -19,8 +20,30 @@ fn part1(input_str: &str) -> i32 {
         })
 }
 
-fn part2(input_str: &str) {
-    
+fn part2(input_str: &str) -> String {
+    let mut result = String::new();
+
+    get_registers(input_str)
+        .into_iter()
+        .enumerate()
+        .for_each(|(i, register)| {
+            if i >= 240 {
+                return;
+            }
+
+            let m = (i % 40) as i32;
+            if m == 0 {
+                result.push('\n');
+            }
+
+            if (m - register).abs() <= 1 {
+                result.push('#');
+            } else {
+                result.push('.');
+            }
+        });
+
+    result
 }
 
 fn get_registers(input_str: &str) -> Vec<i32> {
@@ -53,5 +76,17 @@ mod tests {
     fn part1_example_test() {
         let input_str = include_str!("../../inputs/101test.txt");
         assert_eq!(part1(input_str), 13140);
+    }
+
+    #[test]
+    fn part2_example_test() {
+        let input_str = include_str!("../../inputs/101test.txt");
+        let expected = "\n##..##..##..##..##..##..##..##..##..##..\n\
+             ###...###...###...###...###...###...###.\n\
+             ####....####....####....####....####....\n\
+             #####.....#####.....#####.....#####.....\n\
+             ######......######......######......####\n\
+             #######.......#######.......#######.....";
+        assert_eq!(part2(input_str), expected);
     }
 }
