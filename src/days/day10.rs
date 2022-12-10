@@ -4,8 +4,26 @@ pub fn solve() {
 }
 
 fn part1(input_str: &str) -> i32 {
-    let a = [20, 60, 100, 140, 180, 220];
+    let signal_cycle = [20, 60, 100, 140, 180, 220];
 
+    get_registers(input_str)
+        .into_iter()
+        .enumerate()
+        .fold(0, |signal_strength, (i, register)| {
+            let cycle = i + 1;
+            if signal_cycle.contains(&cycle) {
+                let add = cycle as i32 * register;
+                return signal_strength + add;
+            }
+            signal_strength
+        })
+}
+
+fn part2(input_str: &str) {
+    
+}
+
+fn get_registers(input_str: &str) -> Vec<i32> {
     input_str
         .lines()
         .flat_map(|line| {
@@ -14,7 +32,7 @@ fn part1(input_str: &str) -> i32 {
             }
             return vec!["noop", line];
         })
-        .fold(vec![0, 1], |mut registers, action| {
+        .fold(vec![1], |mut registers, action| {
             if action.starts_with("addx") {
                 let add_val: i32 = action.split(" ").collect::<Vec<&str>>()[1].parse().unwrap();
                 let new_xreg = add_val + registers.last().unwrap();
@@ -22,16 +40,8 @@ fn part1(input_str: &str) -> i32 {
             } else {
                 registers.push(*registers.last().unwrap());
             }
+
             registers
-        })
-        .into_iter()
-        .enumerate()
-        .fold(0, |acc, (cycle, register)| {
-            if a.contains(&cycle) {
-                let add = cycle as i32 * register;
-                return acc + add;
-            }
-            acc
         })
 }
 
