@@ -3,6 +3,9 @@ use std::collections::VecDeque;
 pub fn solve() {
     let part1_answer = part1();
     println!("part1: {}", part1_answer);
+
+    let part2_answer = part2();
+    println!("part2: {}", part2_answer);
 }
 
 fn part1() -> usize {
@@ -24,6 +27,43 @@ fn part1() -> usize {
                 };
 
                 let new_value = new_value / 3;
+
+                let next_monkey: usize;
+                if new_value % monkeys[i].test == 0 {
+                    next_monkey = monkeys[i].test_result.on_true;
+                } else {
+                    next_monkey = monkeys[i].test_result.on_false;
+                }
+
+                monkeys[next_monkey].items.push_back(new_value);
+            }
+        }
+    }
+
+    monkeys.sort_by(|a, b| b.inspected_count.cmp(&a.inspected_count));
+    monkeys[0].inspected_count * monkeys[1].inspected_count
+}
+
+fn part2() -> usize {
+    let mut monkeys: Vec<Monkey> = include_str!("../../inputs/111real.txt")
+        .split("\n\n")
+        .map(|line| Monkey::new(line))
+        .collect();
+
+    let modulo: usize = monkeys.iter().map(|monkey| monkey.test).product();
+
+    for _ in 0..10_000 {
+        for i in 0..monkeys.len() {
+            while monkeys[i].items.len() > 0 {
+                monkeys[i].inspected_count += 1;
+                let item = monkeys[i].items.pop_front().unwrap();
+
+                let new_value = match monkeys[i].operation {
+                    Operation::Multiply(x) => item * x,
+                    Operation::Add(x) => item + x,
+                    Operation::Pow(x) => item.pow(x),
+                };
+                let new_value = new_value % modulo;
 
                 let next_monkey: usize;
                 if new_value % monkeys[i].test == 0 {
