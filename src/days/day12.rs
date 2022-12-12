@@ -7,34 +7,7 @@ pub fn solve() {
 }
 
 pub fn part1(input: &str) -> usize {
-    let mut start = Coord { x: 0, y: 0 };
-    let mut end = Coord { x: 0, y: 0 };
-
-    let grid: Vec<Vec<char>> = input
-        .lines()
-        .map(|line| line.chars().collect::<Vec<char>>())
-        .collect();
-
-    grid.iter().enumerate().for_each(|(y, vc)| {
-        vc.iter().enumerate().for_each(|(x, c)| match *c {
-            'S' => start = Coord { x, y },
-            'E' => end = Coord { x, y },
-            _ => (),
-        })
-    });
-
-    let grid: Vec<Vec<usize>> = grid
-        .into_iter()
-        .map(|line| {
-            line.into_iter()
-                .map(|c| match c {
-                    'S' => 'a' as usize,
-                    'E' => 'z' as usize,
-                    _ => c as usize,
-                })
-                .collect::<Vec<usize>>()
-        })
-        .collect();
+    let (grid, start, end) = init_grid(input);
 
     let mut visited: HashSet<Coord> = HashSet::new();
     let mut q: VecDeque<(Coord, usize)> = VecDeque::new();
@@ -80,34 +53,7 @@ pub fn part1(input: &str) -> usize {
 }
 
 pub fn part2(input: &str) -> usize {
-    let mut start = Coord { x: 0, y: 0 };
-    let mut end = Coord { x: 0, y: 0 };
-
-    let grid: Vec<Vec<char>> = input
-        .lines()
-        .map(|line| line.chars().collect::<Vec<char>>())
-        .collect();
-
-    grid.iter().enumerate().for_each(|(y, vc)| {
-        vc.iter().enumerate().for_each(|(x, c)| match *c {
-            'S' => start = Coord { x, y },
-            'E' => end = Coord { x, y },
-            _ => (),
-        })
-    });
-
-    let grid: Vec<Vec<usize>> = grid
-        .into_iter()
-        .map(|line| {
-            line.into_iter()
-                .map(|c| match c {
-                    'S' => 'a' as usize,
-                    'E' => 'z' as usize,
-                    _ => c as usize,
-                })
-                .collect::<Vec<usize>>()
-        })
-        .collect();
+    let (grid, _, end) = init_grid(input);
 
     let mut visited: HashSet<Coord> = HashSet::new();
     let mut q: VecDeque<(Coord, usize)> = VecDeque::new();
@@ -150,6 +96,39 @@ pub fn part2(input: &str) -> usize {
     }
 
     0
+}
+
+fn init_grid(input: &str) -> (Vec<Vec<usize>>, Coord, Coord) {
+    let mut start = Coord { x: 0, y: 0 };
+    let mut end = Coord { x: 0, y: 0 };
+
+    let grid: Vec<Vec<char>> = input
+        .lines()
+        .map(|line| line.chars().collect::<Vec<char>>())
+        .collect();
+
+    grid.iter().enumerate().for_each(|(y, vc)| {
+        vc.iter().enumerate().for_each(|(x, c)| match *c {
+            'S' => start = Coord { x, y },
+            'E' => end = Coord { x, y },
+            _ => (),
+        })
+    });
+
+    let grid: Vec<Vec<usize>> = grid
+        .into_iter()
+        .map(|line| {
+            line.into_iter()
+                .map(|c| match c {
+                    'S' => 'a' as usize,
+                    'E' => 'z' as usize,
+                    _ => c as usize,
+                })
+                .collect::<Vec<usize>>()
+        })
+        .collect();
+
+    (grid, start, end)
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
