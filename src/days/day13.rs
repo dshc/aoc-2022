@@ -3,6 +3,8 @@ use std::cmp::Ordering;
 pub fn solve() {
     let input = include_str!("../../inputs/131real.txt");
     println!("part1: {}", part1(input));
+    let input = include_str!("../../inputs/132real.txt");
+    println!("part2: {}", part2(input));
 }
 
 fn part1(input: &str) -> usize {
@@ -12,6 +14,26 @@ fn part1(input: &str) -> usize {
         .filter(|(_, pair)| compare(pair))
         .map(|(i, _)| i + 1)
         .sum()
+}
+
+fn part2(input: &str) -> usize {
+    let mut packets = input
+        .split("\n")
+        .filter(|s| !s.is_empty())
+        .map(|s| convert(s))
+        .collect::<Vec<Packet>>();
+    let six = &Packet::List(vec![Packet::List(vec![Packet::Number(6)])]);
+    let two = &Packet::List(vec![Packet::List(vec![Packet::Number(2)])]);
+    packets.sort_by(compare_packets);
+    packets.iter().enumerate().fold(1, |acc, (i, packet)| {
+        if compare_packets(packet, two) == Ordering::Equal
+            || compare_packets(packet, six) == Ordering::Equal
+        {
+            acc * (i+1)
+        } else {
+            acc
+        }
+    })
 }
 
 fn compare(pair: &str) -> bool {
@@ -169,6 +191,19 @@ mod tests {
     }
 
     #[test]
+    fn test_equality() {
+        let input = "[[6]]";
+        let input = convert(input);
+        assert_eq!(
+            compare_packets(
+                &input,
+                &Packet::List(vec![Packet::List(vec![Packet::Number(6)])])
+            ),
+            Ordering::Equal
+        );
+    }
+
+    #[test]
     fn part1_example_test() {
         let input = "[1,1,3,1,1]
 [1,1,5,1,1]
@@ -195,5 +230,37 @@ mod tests {
 [1,[2,[3,[4,[5,6,0]]]],8,9]";
 
         assert_eq!(part1(input), 13);
+    }
+
+    #[test]
+    fn part2_example_test() {
+        let input = "[[2]]
+[[6]]
+
+[1,1,3,1,1]
+[1,1,5,1,1]
+
+[[1],[2,3,4]]
+[[1],4]
+
+[9]
+[[8,7,6]]
+
+[[4,4],4,4]
+[[4,4],4,4,4]
+
+[7,7,7,7]
+[7,7,7]
+
+[]
+[3]
+
+[[[]]]
+[[]]
+
+[1,[2,[3,[4,[5,6,7]]]],8,9]
+[1,[2,[3,[4,[5,6,0]]]],8,9]";
+
+        assert_eq!(part2(input), 140);
     }
 }
