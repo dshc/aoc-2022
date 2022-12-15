@@ -3,6 +3,48 @@ use std::collections::{HashMap, HashSet};
 pub fn solve() {
     let input = include_str!("../../inputs/151real.txt");
     println!("part1: {}", part1(input, 2_000_000));
+    println!("part2: {}", part2(input, 4_000_000));
+}
+
+fn part2(input: &str, search_space: isize) -> usize {
+    let readings = parse_input(input);
+    for reading in &readings {
+        let dist = reading.distance();
+        for y in reading.sensor.y - dist - 1..=reading.sensor.y + dist + 1 {
+            if y < 0 || y > search_space {
+                continue;
+            }
+
+            let y_dist_from_center = (reading.sensor.y - y).abs();
+            let diff = dist - y_dist_from_center + 1;
+            let min_row_x = reading.sensor.x - diff;
+            let max_row_x = reading.sensor.x + diff;
+
+            if min_row_x >= 0 && min_row_x <= search_space {
+                if check_coord(&Coord { x: min_row_x, y }, &readings) {
+                    return (min_row_x as usize * 4_000_000) + y as usize;
+                }
+            }
+
+            if max_row_x >= 0 && max_row_x <= search_space {
+                if check_coord(&Coord { x: max_row_x, y }, &readings) {
+                    return (max_row_x as usize * 4_000_000) + y as usize;
+                }
+            }
+        }
+    }
+
+    0
+}
+
+fn check_coord(curr_coord: &Coord, readings: &Vec<DeviceReading>) -> bool {
+    for reading in readings {
+        if calc_distance(&curr_coord, &reading.sensor) <= reading.distance() {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 fn part1(input: &str, check_row: isize) -> usize {
@@ -105,6 +147,7 @@ fn calc_distance(a: &Coord, b: &Coord) -> isize {
 
 #[derive(Debug)]
 enum Space {
+    #[allow(dead_code)]
     Empty,
     Sensor,
     Beacon,
@@ -152,5 +195,11 @@ mod tests {
     fn part1_example_test() {
         let input = include_str!("../../inputs/151test.txt");
         assert_eq!(part1(input, 10), 26);
+    }
+
+    #[test]
+    fn part2_example_test() {
+        let input = include_str!("../../inputs/151test.txt");
+        assert_eq!(part2(input, 20), 56000011);
     }
 }
