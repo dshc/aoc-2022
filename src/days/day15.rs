@@ -14,8 +14,6 @@ fn part1(input: &str, check_row: isize) -> usize {
         grid.insert(reading.sensor, Space::Sensor);
     });
 
-    // _print_part1_example_grid(&grid);
-
     // get max possible distance based on input
     let max_distance = readings
         .iter()
@@ -59,25 +57,7 @@ fn part1(input: &str, check_row: isize) -> usize {
     count
 }
 
-fn _print_part1_example_grid(grid: &HashMap<Coord, Space>) {
-    let mut map = vec![vec!['.'; 50]; 50];
-    for (c, s) in grid {
-        match s {
-            Space::Empty => map[(c.y + 10) as usize][(c.x + 10) as usize] = '#',
-            Space::Sensor => map[(c.y + 10) as usize][(c.x + 10) as usize] = 'S',
-            Space::Beacon => map[(c.y + 10) as usize][(c.x + 10) as usize] = 'B',
-        }
-    }
-
-    for x in map {
-        for c in x {
-            print!("{}", c);
-        }
-        println!();
-    }
-}
-
-fn update_range(grid: &mut HashMap<Coord, Space>, sensor: &Coord, max_distance: isize) {
+fn _update_range(grid: &mut HashMap<Coord, Space>, sensor: &Coord, max_distance: isize) {
     let dirs = &[(0, 1), (1, 0), (-1, 0), (0, -1)];
 
     let mut s: Vec<Coord> = Vec::new();
