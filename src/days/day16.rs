@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 pub fn solve() {
     let input = include_str!("../../inputs/161real.txt");
     println!("part1: {}", part1(input));
+    println!("part2: {}", part2(input));
 }
 
 fn part1(input: &str) -> usize {
@@ -10,6 +11,12 @@ fn part1(input: &str) -> usize {
     let mut cache: HashMap<(u32, String, usize), usize> = HashMap::new();
     dfs(&valves, &valves["AA"], 30, 0, &HashSet::new(), &mut cache)
 }
+
+fn part2(input: &str) -> usize {
+    let valves = parse_input(input);
+    0
+}
+
 
 fn dfs(
     all_valves: &HashMap<String, Valve>,
@@ -25,16 +32,11 @@ fn dfs(
 
     let curr_pressure = pressure_released + calc_pressure_added(&open_valves, all_valves);
 
-    let cache_key = get_cache_key(
-        time_remaining,
-        curr_valve.name.to_owned(),
-        curr_pressure,
-    );
+    let cache_key = get_cache_key(time_remaining, curr_valve.name.to_owned(), curr_pressure);
 
     if cache.contains_key(&cache_key) {
         return cache[&cache_key];
     }
-
 
     let mut max = 0;
     if curr_valve.flow_rate > 0 && !open_valves.contains(&curr_valve.name) {
@@ -125,7 +127,12 @@ mod tests {
     #[test]
     fn part1_example_test() {
         let input = include_str!("../../inputs/161test.txt");
-
         assert_eq!(part1(input), 1651);
+    }
+
+    #[test]
+    fn part2_example_test() {
+        let input = include_str!("../../inputs/161test.txt");
+        assert_eq!(part2(input), 1707);
     }
 }
