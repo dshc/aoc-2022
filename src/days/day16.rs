@@ -1,0 +1,131 @@
+use std::collections::{HashMap, HashSet};
+
+pub fn solve() {
+    let input = include_str!("../../inputs/161real.txt");
+    println!("part1: {}", part1(input));
+}
+
+fn part1(input: &str) -> usize {
+    let valves = parse_input(input);
+    let mut cache: HashMap<(u32, String, usize), usize> = HashMap::new();
+    dfs(&valves, &valves["AA"], 30, 0, &HashSet::new(), &mut cache)
+}
+
+fn dfs(
+    all_valves: &HashMap<String, Valve>,
+    curr_valve: &Valve,
+    time_remaining: u32,
+    pressure_released: usize,
+    open_valves: &HashSet<String>,
+    cache: &mut HashMap<(u32, String, usize), usize>,
+) -> usize {
+    if time_remaining <= 0 {
+        return pressure_released;
+    }
+
+    let curr_pressure = pressure_released + calc_pressure_added(&open_valves, all_valves);
+
+    let cache_key = get_cache_key(
+        time_remaining,
+        curr_valve.name.to_owned(),
+        curr_pressure,
+    );
+
+    if cache.contains_key(&cache_key) {
+        return cache[&cache_key];
+    }
+
+
+    let mut max = 0;
+    if curr_valve.flow_rate > 0 && !open_valves.contains(&curr_valve.name) {
+        // Open the valve
+        let mut next_open_valves: HashSet<String> = open_valves.iter().cloned().collect();
+        next_open_valves.insert(curr_valve.name.to_owned());
+        max = dfs(
+            all_valves,
+            curr_valve,
+            time_remaining - 1,
+            curr_pressure,
+            &next_open_valves,
+            cache,
+        );
+    }
+
+    let next_open_valves: HashSet<String> = open_valves.iter().cloned().collect();
+    for next_valve_name in curr_valve.tunnels.iter() {
+        // traverse tunnels
+        max = std::cmp::max(
+            max,
+            dfs(
+                all_valves,
+                &all_valves[next_valve_name],
+                time_remaining - 1,
+                curr_pressure,
+                &next_open_valves,
+                cache,
+            ),
+        );
+    }
+
+    cache.insert(cache_key, max);
+
+    max
+}
+
+fn get_cache_key(time: u32, valve: String, pressure: usize) -> (u32, String, usize) {
+    (time, valve, pressure)
+}
+
+fn calc_pressure_added(
+    open_valves: &HashSet<String>,
+    all_valves: &HashMap<String, Valve>,
+) -> usize {
+    open_valves
+        .iter()
+        .map(|open_valve| all_valves.get(open_valve).unwrap().flow_rate)
+        .sum()
+}
+
+fn parse_input(input: &str) -> HashMap<String, Valve> {
+    input
+        .trim()
+        .lines()
+        .map(|line| {
+            let mut parts = line.split(";");
+            let name = parts.next().unwrap().to_string();
+            let flow_rate = parts.next().unwrap().parse::<usize>().unwrap();
+            let tunnels = parts
+                .flat_map(|s| s.split(","))
+                .map(|s| s.to_string())
+                .collect::<Vec<String>>();
+
+            (
+                name.to_owned(),
+                Valve {
+                    name,
+                    flow_rate,
+                    tunnels,
+                },
+            )
+        })
+        .collect()
+}
+
+#[derive(Debug)]
+struct Valve {
+    name: String,
+    flow_rate: usize,
+    tunnels: Vec<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn part1_example_test() {
+        let input = include_str!("../../inputs/161test.txt");
+
+        assert_eq!(part1(input), 1651);
+    }
+}
