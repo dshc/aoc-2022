@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 pub fn solve() {
     let input = include_str!("../../inputs/161real.txt");
@@ -8,8 +8,8 @@ pub fn solve() {
 
 fn part1(input: &str) -> usize {
     let valves = parse_input(input);
-    let mut cache: HashMap<(u32, usize, usize), usize> = HashMap::new();
-    dfs(&valves, 0, 30, 0, &HashSet::new(), &mut cache)
+    let mut cache: HashMap<(usize, usize, usize), usize> = HashMap::new();
+    dfs(&valves, 0, 30, 0, 0 << valves.len(), &mut cache)
 }
 
 fn part2(input: &str) -> usize {
@@ -20,39 +20,36 @@ fn part2(input: &str) -> usize {
 fn dfs(
     all_valves: &HashMap<usize, Valve>,
     curr_valve: usize,
-    time_remaining: u32,
+    time_remaining: usize,
     pressure_released: usize,
-    open_valves: &HashSet<usize>,
-    cache: &mut HashMap<(u32, usize, usize), usize>,
+    open_valves: usize,
+    cache: &mut HashMap<(usize, usize, usize), usize>,
 ) -> usize {
     if time_remaining <= 0 {
         return pressure_released;
     }
 
-    let curr_pressure = pressure_released + calc_pressure_added(&open_valves, all_valves);
+    let curr_pressure = pressure_released + calc_pressure_added(open_valves, all_valves);
 
-    let cache_key = get_cache_key(time_remaining, curr_valve, curr_pressure);
+    let cache_key = (time_remaining, curr_valve, curr_pressure);
 
     if cache.contains_key(&cache_key) {
         return cache[&cache_key];
     }
 
     let mut max = 0;
-    if all_valves[&curr_valve].flow_rate > 0 && !open_valves.contains(&curr_valve) {
+    if all_valves[&curr_valve].flow_rate > 0 && open_valves & (1 << curr_valve) == 0 {
         // Open the valve
-        let mut next_open_valves: HashSet<usize> = open_valves.iter().cloned().collect();
-        next_open_valves.insert(curr_valve);
         max = dfs(
             all_valves,
             curr_valve,
             time_remaining - 1,
             curr_pressure,
-            &next_open_valves,
+            open_valves | (1 << curr_valve),
             cache,
         );
     }
 
-    let next_open_valves: HashSet<usize> = open_valves.iter().cloned().collect();
     for next_valve in all_valves[&curr_valve].tunnels.iter() {
         // traverse tunnels
         max = std::cmp::max(
@@ -62,7 +59,7 @@ fn dfs(
                 *next_valve,
                 time_remaining - 1,
                 curr_pressure,
-                &next_open_valves,
+                open_valves,
                 cache,
             ),
         );
@@ -73,14 +70,11 @@ fn dfs(
     max
 }
 
-fn get_cache_key(time: u32, valve: usize, pressure: usize) -> (u32, usize, usize) {
-    (time, valve, pressure)
-}
-
-fn calc_pressure_added(open_valves: &HashSet<usize>, all_valves: &HashMap<usize, Valve>) -> usize {
-    open_valves
+fn calc_pressure_added(open_valves: usize, all_valves: &HashMap<usize, Valve>) -> usize {
+    all_valves
         .iter()
-        .map(|open_valve| all_valves.get(open_valve).unwrap().flow_rate)
+        .filter(|valve| (1 << *valve.0) & open_valves == (1 << *valve.0))
+        .map(|valve| valve.1.flow_rate)
         .sum()
 }
 
