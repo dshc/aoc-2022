@@ -8,7 +8,7 @@ pub fn solve() {
 
 fn part1(input: &str) -> usize {
     let valves = parse_input(input);
-    let mut cache: HashMap<(usize, usize, u128, usize), usize> = HashMap::new();
+    let mut cache: HashMap<(usize, usize, u128), (usize, usize)> = HashMap::new();
     dfs(&valves, 0, 30, 0, 0 << valves.len(), &mut cache)
 }
 
@@ -23,16 +23,16 @@ fn dfs(
     time_remaining: usize,
     pressure_released: usize,
     open_valves: u128,
-    cache: &mut HashMap<(usize, usize, u128, usize), usize>,
+    cache: &mut HashMap<(usize, usize, u128), (usize, usize)>,
 ) -> usize {
     if time_remaining <= 0 {
         return pressure_released;
     }
 
-    let cache_key = (time_remaining, curr_valve, open_valves, pressure_released);
+    let cache_key = (time_remaining, curr_valve, open_valves);
 
-    if cache.contains_key(&cache_key) {
-        return cache[&cache_key];
+    if cache.contains_key(&cache_key) && cache[&cache_key].0 >= pressure_released{
+        return cache[&cache_key].1;
     }
 
     let mut max = 0;
@@ -64,7 +64,7 @@ fn dfs(
         );
     }
 
-    cache.insert(cache_key, max);
+    cache.insert(cache_key, (pressure_released, max));
 
     max
 }
