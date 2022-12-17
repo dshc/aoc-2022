@@ -10,13 +10,15 @@ fn part1(input: &str, num_rocks: usize) -> usize {
     let mut rock_shape_iter = get_rock_shape_iter();
     let mut playing_field = vec![HashSet::from([0]); 7];
 
-    for _ in 0..num_rocks {
-        let starting_height = get_field_max_height(&playing_field) + 4;
+    let mut max_height = 0;
 
-        let mut pieces = rock_shape_iter.next().unwrap().get_pieces();
+    for _ in 0..num_rocks {
+        let mut rock_bottom_height = max_height + 4;
+        let rock = rock_shape_iter.next().unwrap();
+        let mut pieces = rock.get_pieces();
 
         translate(Direction::Right, 2, &mut pieces);
-        translate(Direction::Up, starting_height, &mut pieces);
+        translate(Direction::Up, rock_bottom_height, &mut pieces);
 
         loop {
             if let Some(dir) = gas_direction_iter.next() {
@@ -27,24 +29,27 @@ fn part1(input: &str, num_rocks: usize) -> usize {
 
             if can_move(&Direction::Down, &pieces, &playing_field) {
                 translate(Direction::Down, 1, &mut pieces);
+                rock_bottom_height -= 1;
             } else {
                 break;
             }
         }
 
         update_playing_field(&mut playing_field, &pieces);
+
+        max_height = std::cmp::max(max_height, rock_bottom_height + rock.height - 1);
     }
 
-    get_field_max_height(&playing_field)
+    max_height
 }
 
-fn get_field_max_height(playing_field: &Vec<HashSet<usize>>) -> usize {
+/* fn get_field_max_height(playing_field: &Vec<HashSet<usize>>) -> usize {
     let mut max = 0;
     for set in playing_field {
         max = std::cmp::max(max, *set.iter().max().unwrap());
     }
     max
-}
+} */
 
 fn update_playing_field(playing_field: &mut Vec<HashSet<usize>>, pieces: &Vec<(usize, usize)>) {
     for (x, y) in pieces {
@@ -110,22 +115,27 @@ fn get_rock_shape_iter() -> impl Iterator<Item = RockShape<'static>> {
         // -
         RockShape {
             pieces: &[(0, 0), (1, 0), (2, 0), (3, 0)],
+            height: 1,
         },
         // +
         RockShape {
             pieces: &[(1, 0), (0, 1), (1, 1), (2, 1), (1, 2)],
+            height: 3,
         },
         // backwards L
         RockShape {
             pieces: &[(0, 0), (1, 0), (2, 0), (2, 1), (2, 2)],
+            height: 3,
         },
         // l
         RockShape {
             pieces: &[(0, 0), (0, 1), (0, 2), (0, 3)],
+            height: 4,
         },
         // square
         RockShape {
             pieces: &[(0, 0), (1, 0), (0, 1), (1, 1)],
+            height: 2,
         },
     ]
     .into_iter()
@@ -152,6 +162,7 @@ enum Direction {
 #[derive(Debug, Clone, Copy)]
 struct RockShape<'a> {
     pieces: &'a [(usize, usize)],
+    height: usize,
 }
 
 impl RockShape<'_> {
