@@ -30,6 +30,7 @@ fn main() {
         14 => day14::solve(),
         15 => day15::solve(),
         16 => day16::solve(),
+        17 => day17::solve(),
         _ => unimplemented!(),
     }
     println!("Timer (ms): {:#?}", now.elapsed());
