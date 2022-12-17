@@ -9,7 +9,7 @@ pub fn solve() {
 fn part1(input: &str) -> usize {
     let valves = parse_input(input);
     let mut cache: HashMap<(usize, usize, u128), (usize, usize)> = HashMap::new();
-    dfs(&valves, 0, 30, 0, 0 << valves.len(), &mut cache)
+    dfs(&valves, 0, 30, 0, 0, 0, &mut cache)
 }
 
 fn part2(input: &str) -> usize {
@@ -23,15 +23,16 @@ fn dfs(
     time_remaining: usize,
     pressure_released: usize,
     open_valves: u128,
+    visited_valves: u128,
     cache: &mut HashMap<(usize, usize, u128), (usize, usize)>,
 ) -> usize {
-    if time_remaining <= 0 {
+    if time_remaining <= 0 || (pressure_released == 0 && visited_valves & (1 << curr_valve) > 0) {
         return pressure_released;
     }
 
     let cache_key = (time_remaining, curr_valve, open_valves);
 
-    if cache.contains_key(&cache_key) && cache[&cache_key].0 >= pressure_released{
+    if cache.contains_key(&cache_key) && cache[&cache_key].0 >= pressure_released {
         return cache[&cache_key].1;
     }
 
@@ -45,6 +46,7 @@ fn dfs(
             time_remaining - 1,
             pressure_released + p,
             open_valves | (1 << curr_valve),
+            visited_valves | (1 << curr_valve),
             cache,
         );
     }
@@ -59,6 +61,7 @@ fn dfs(
                 time_remaining - 1,
                 pressure_released,
                 open_valves,
+                visited_valves | (1 << curr_valve),
                 cache,
             ),
         );
