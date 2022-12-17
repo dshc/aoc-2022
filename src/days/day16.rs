@@ -8,7 +8,7 @@ pub fn solve() {
 
 fn part1(input: &str) -> usize {
     let valves = parse_input(input);
-    let mut cache: HashMap<(usize, usize, usize), usize> = HashMap::new();
+    let mut cache: HashMap<(usize, usize, u128, usize), usize> = HashMap::new();
     dfs(&valves, 0, 30, 0, 0 << valves.len(), &mut cache)
 }
 
@@ -22,16 +22,14 @@ fn dfs(
     curr_valve: usize,
     time_remaining: usize,
     pressure_released: usize,
-    open_valves: usize,
-    cache: &mut HashMap<(usize, usize, usize), usize>,
+    open_valves: u128,
+    cache: &mut HashMap<(usize, usize, u128, usize), usize>,
 ) -> usize {
     if time_remaining <= 0 {
         return pressure_released;
     }
 
-    let curr_pressure = pressure_released + calc_pressure_added(open_valves, all_valves);
-
-    let cache_key = (time_remaining, curr_valve, curr_pressure);
+    let cache_key = (time_remaining, curr_valve, open_valves, pressure_released);
 
     if cache.contains_key(&cache_key) {
         return cache[&cache_key];
@@ -40,11 +38,12 @@ fn dfs(
     let mut max = 0;
     if all_valves[&curr_valve].flow_rate > 0 && open_valves & (1 << curr_valve) == 0 {
         // Open the valve
+        let p = all_valves[&curr_valve].flow_rate * (time_remaining - 1);
         max = dfs(
             all_valves,
             curr_valve,
             time_remaining - 1,
-            curr_pressure,
+            pressure_released + p,
             open_valves | (1 << curr_valve),
             cache,
         );
@@ -58,7 +57,7 @@ fn dfs(
                 all_valves,
                 *next_valve,
                 time_remaining - 1,
-                curr_pressure,
+                pressure_released,
                 open_valves,
                 cache,
             ),
@@ -68,14 +67,6 @@ fn dfs(
     cache.insert(cache_key, max);
 
     max
-}
-
-fn calc_pressure_added(open_valves: usize, all_valves: &HashMap<usize, Valve>) -> usize {
-    all_valves
-        .iter()
-        .filter(|valve| (1 << *valve.0) & open_valves == (1 << *valve.0))
-        .map(|valve| valve.1.flow_rate)
-        .sum()
 }
 
 fn parse_input(input: &str) -> HashMap<usize, Valve> {
