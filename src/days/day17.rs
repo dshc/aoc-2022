@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 pub fn solve() {
     let input = include_str!("../../inputs/171real.txt");
     println!("2022 iterations: {}", part1(input, 2022));
-    // println!("1 trillion iterations: {}", part1(input, 1000000000000));
+    println!("1 trillion iterations: {}", part1(input, 1000000000000));
 }
 
 fn part1(input: &str, num_rocks: usize) -> usize {
@@ -18,13 +18,7 @@ fn part1(input: &str, num_rocks: usize) -> usize {
         (
             usize, // rock_index
             usize, // gas_index
-            usize, // x = 0
-            usize, // x = 1
-            usize, // x = 2
-            usize, // x = 3
-            usize, // x = 4
-            usize, // x = 5
-            usize, // x = 6
+            u128,  // shape of recent blocks
         ),
         (usize, usize), // max height, rock number
     > = HashMap::new();
@@ -40,40 +34,40 @@ fn part1(input: &str, num_rocks: usize) -> usize {
         translate(&Direction::Up, rock_bottom_height, &mut pieces);
 
         let mut init_gas_index_set = false;
-        let mut init_gas_index = 0;
-
         loop {
             let (gas_index, dir) = gas_direction_iter.next().unwrap();
-            if !init_gas_index_set && !skip_ahead {
-                init_gas_index = gas_index;
+            if rock_number > 100 && !init_gas_index_set && !skip_ahead {
                 init_gas_index_set = true;
 
-                let k = &get_cache_key(rock_index, init_gas_index, max_height, &playing_field);
+                let k = &get_cache_key(rock_index, gas_index, max_height, &playing_field);
 
                 if cache.contains_key(k) {
+                    // print_field(max_height, &playing_field);
                     let (prev_height, prev_rock_number) = cache.get(k).unwrap();
                     let rocks_to_skip = rock_number - prev_rock_number;
                     let height_to_add = max_height - prev_height;
-                    let num_cycles_to_skip_ahead = (num_rocks - rock_number) / rocks_to_skip;
+                    let num_cycles_to_skip_ahead =
+                        (num_rocks - rock_number) / rocks_to_skip;
+                    println!("num-rocks: {}", num_rocks);
+                    println!("rocknum: {}", rock_number);
+                    println!("rockstoskip: {}", rocks_to_skip);
+                    println!("cycles to skip: {}", num_cycles_to_skip_ahead);
+
                     rock_number += num_cycles_to_skip_ahead * rocks_to_skip;
                     max_height += num_cycles_to_skip_ahead * height_to_add;
-                    println!("new rock number: {}", rock_number);
-                    println!("new max_height: {}", max_height);
+                    // println!("new rock number: {}", rock_number);
+                    // println!("new max_height: {}", max_height);
                     skip_ahead = true;
 
                     // update pieces of current rock
                     translate(&Direction::Up, max_height, &mut pieces);
 
                     // update all playing field pieces
-                    let new_playing_field = playing_field
-                        .iter()
-                        .map(|set| {
-                            set.iter()
-                                .map(|x| *x + max_height)
-                                .collect::<HashSet<usize>>()
-                        })
-                        .collect::<Vec<HashSet<usize>>>();
-                    playing_field = new_playing_field;
+                    translate_playing_field(max_height, &mut playing_field, k.2);
+
+                    // print_field(max_height, &playing_field);
+                } else {
+                    cache.insert(*k, (max_height, rock_number));
                 }
             }
 
@@ -92,18 +86,45 @@ fn part1(input: &str, num_rocks: usize) -> usize {
         update_playing_field(&mut playing_field, &pieces);
 
         max_height = std::cmp::max(max_height, rock_bottom_height + rock.height - 1);
-
-        if !skip_ahead {
-            cache.insert(
-                get_cache_key(rock_index, init_gas_index, max_height, &playing_field),
-                (max_height, rock_number),
-            );
+        if skip_ahead {
+            // println!("rock: {}, max_height: {}", rock_number, max_height);
+            // print_field(max_height, &playing_field);
         }
 
         rock_number += 1;
     }
 
+    // print_field(max_height, &playing_field);
     max_height
+}
+
+fn translate_playing_field(
+    new_max_height: usize,
+    playing_field: &mut Vec<HashSet<usize>>,
+    key: u128,
+) {
+    for y in 0..8 {
+        for (x, set) in playing_field.iter_mut().enumerate() {
+            if key & (1 << (8 * x) + y) > 0 {
+                set.insert(new_max_height - y);
+            }
+        }
+    }
+}
+
+fn _print_field(total_max_height: usize, playing_field: &Vec<HashSet<usize>>) {
+    for y in 0..16 {
+        for (_, set) in playing_field.iter().enumerate() {
+            if set.contains(&(total_max_height - y)) {
+                print!("#");
+            } else {
+                print!(".");
+            }
+        }
+        print!("   line number {}", total_max_height - y);
+        println!();
+    }
+    println!();
 }
 
 fn get_cache_key(
@@ -111,27 +132,16 @@ fn get_cache_key(
     gas_index: usize,
     total_max_height: usize,
     playing_field: &Vec<HashSet<usize>>,
-) -> (
-    usize,
-    usize,
-    usize,
-    usize,
-    usize,
-    usize,
-    usize,
-    usize,
-    usize,
-) {
-    let x = playing_field
-        .iter()
-        .map(|set| {
-            let temp = *set.iter().max().unwrap();
-            total_max_height - temp
-        })
-        .collect::<Vec<usize>>();
-    (
-        rock_index, gas_index, x[0], x[1], x[2], x[3], x[4], x[5], x[6],
-    )
+) -> (usize, usize, u128) {
+    let mut shape = 0;
+    for y in 0..8 {
+        for (x, set) in playing_field.iter().enumerate() {
+            if set.contains(&(total_max_height - y)) {
+                shape |= 1 << (8 * x) + y;
+            }
+        }
+    }
+    (rock_index, gas_index, shape)
 }
 
 fn update_playing_field(playing_field: &mut Vec<HashSet<usize>>, pieces: &Vec<(usize, usize)>) {
@@ -266,9 +276,9 @@ mod tests {
         assert_eq!(part1(input, 2022), 3068);
     }
 
-    // #[test]
-    // fn part2_example_test() {
-    //     let input = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>";
-    //     assert_eq!(part1(input, 1000000000000), 1514285714288);
-    // }
+    #[test]
+    fn part2_example_test() {
+        let input = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>";
+        assert_eq!(part1(input, 1000000000000), 1514285714288);
+    }
 }
